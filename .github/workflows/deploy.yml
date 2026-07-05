@@ -1,0 +1,31 @@
+name: Deploy App a EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Conectarse a EC2 a traves de SSH y deployar app
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/hola-devops
+
+            git pull origin main
+
+            docker build -t hola-devops:latest .
+
+            docker stop hola-devops-container
+            docker rm hola-devops-container
+            docker run -d \
+              --name hola-devops-container \
+              -p 3001:3000 \
+              hola-devops:latest
