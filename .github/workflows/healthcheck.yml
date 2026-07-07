@@ -1,0 +1,26 @@
+name: Checar app
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+
+  workflow_dispatch:
+
+jobs:
+  healthcheck:
+    name: Healthcheck EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Revisar contenedor y app en EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Revisando contenedor..."
+            docker ps --filter "name=hola-devops-container" --filter "status=running"
+
+            echo "Revisando respuesta HTTP..."
+            curl -f http://localhost:3000
